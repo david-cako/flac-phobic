@@ -12,7 +12,7 @@ flac-phobic eases the pain of this, taking a foobar2000 playlist as input, encod
 
 ##Usage
 
-`flac_phobic playlist.fpl {quality} {output directory}`
+`flac_phobic playlist.fpl {-q quality} {-o output directory}`
 
-`{quality}` defaults to V0, `{output directory}` defaults to `~/Music/flac_phobic/`.
+`{quality}` defaults to `V0`, `{output directory}` defaults to `~/Music/flac_phobic/`.
 
