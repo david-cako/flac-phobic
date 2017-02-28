@@ -8,7 +8,7 @@ I listen to a lot of music, and it's pretty frustrating trying to maintain both 
 
 Seeing as iTunes is incompatible with FLAC, and not wanting to convert a decent portion of my music library from a widely supported format to a less widely supported format, I've just dealt with it, manually converting and maintaining them separately.
 
-flac-phobic eases the pain of this, taking a foobar2000 playlist as input, encoding all FLAC files as mp3, and constructing a new playlist containing all of the newly encoded mp3s, as well as all of the existing lossy files.  Encoded files are all stuck in a new directory, with all of the original directory structure being maintained.
+flac-phobic eases the pain of this, taking a foobar2000 playlist as input, encoding all FLAC files as mp3, and constructing a new playlist containing all of the newly encoded mp3s, as well as all of the existing lossy files.  Encoded files are output into a new directory, with all of the original directory structure being maintained beneath it.
 
 ##Usage
 
