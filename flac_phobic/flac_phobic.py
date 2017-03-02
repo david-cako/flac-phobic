@@ -1,9 +1,12 @@
 #!/usr/bin/python3
-import os, logging, subprocess, queue, re, threading, signal, time, sys
+import os, logging, subprocess, queue, re, requests, threading, shutil.rmtree, signal, time, sys
+from zipfile import ZipFile
 
 PLAYLIST = 'playlist.m3u'
 ENCODE_QUALITY = "0"  # LAME VBR quality -- default V0
 OUTPUT_DIRECTORY = os.path.expanduser('~/Music/flac_phobic')
+FLAC_PHOBIC_DIR = os.path.dirname(os.path.realpath(__file__))
+FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py directory
 
 logging.basicConfig(filename='flac_phobic.log', level=logging.INFO)
 
@@ -15,6 +18,19 @@ class FlacPhobic:
         self.queue = queue.Queue()
         self.threads = []
         self.isdir_lock = threading.Lock()
+        
+        if not os.path.isfile(FFMPEG_PATH):
+            r = requests.get('https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip', stream=True)
+            zip_path = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.zip')
+            with open(zip_path, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+            with ZipFile(zip_path, 'r') as ffzip:
+                ffzip.extract('ffmpeg-latest-win64-static/bin/ffmpeg.exe', FLAC_PHOBIC_DIR)
+                os.rename(os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg-latest-win64-static/bin/ffmpeg.exe'), FFMPEG_PATH)
+            os.remove(zip_path)
+            shutil.rmtree(os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg-latest-win64-static'))
 
         with open(playlist, 'r') as f:
             for line in f.readlines():
@@ -37,7 +53,7 @@ class FlacPhobic:
                 if not os.path.isdir(os.path.split(output)[0]):
                     os.makedirs(os.path.split(output)[0])
                 self.isdir_lock.release()
-                process = subprocess.run(['ffmpeg', '-n', '-i', path, '-q:a', ENCODE_QUALITY, output],
+                process = subprocess.run([FFMPEG_PATH, '-n', '-i', path, '-q:a', ENCODE_QUALITY, output],
                                         stderr=subprocess.PIPE)
                 logging.info("output: %s", process.stderr)
                 self.compressed.append(output)
