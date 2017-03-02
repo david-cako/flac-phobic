@@ -1,8 +1,8 @@
-from steuptools import setup
+from setuptools import setup
 
 setup(name='flac_phobic',
         version='0.1',
-        description='export foobar playlists, re-encoding flac files as mp3.'
+        description='export foobar playlists, re-encoding flac files as mp3.',
         url='https://github.com/david-cako/flac-phobic',
         author='david cako',
         author_email='dc@cako.io',
