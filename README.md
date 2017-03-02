@@ -14,5 +14,7 @@ flac-phobic eases the pain of this, taking a foobar2000 playlist as input, encod
 
 `flac_phobic playlist.fpl {-q quality} {-o output directory}`
 
-`{quality}` [accepts an integer from 0-9](https://trac.ffmpeg.org/wiki/Encode/MP3), and defaults to `0` (`V0`), `{output directory}` defaults to `~/Music/flac_phobic/`.
+`{quality}` [accepts an integer from 0-9](https://trac.ffmpeg.org/wiki/Encode/MP3), and defaults to `0` (`V0`).
+
+`{output directory}` defaults to `~/Music/flac_phobic/`.
 
