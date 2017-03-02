@@ -16,3 +16,10 @@ flac-phobic eases the pain of this, taking an m3u as input, encoding all FLAC fi
 
 `{output directory}` defaults to `~/Music/flac_phobic/`.
 
+Make sure your playlists are just lists of files:
+
+    Z:\Music\...\...\(...).mp3
+    Z:\Music\...\(...).flac
+    Z:\Music\...\...\...\(...).mp3
+
+This script takes *every* line from the playlist, so any extraneous crap is going to be a problem.
