@@ -21,6 +21,7 @@ class FlacPhobic:
         self.isdir_lock = threading.Lock()
  
     def prep_workarea(self):
+        global FFMPEG_PATH
         if not os.path.isfile(FFMPEG_PATH):
             if shutil.which('ffmpeg') != None:
                 FFMPEG_PATH = shutil.which('ffmpeg')
