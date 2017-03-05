@@ -1,5 +1,7 @@
 #!/usr/bin/python3
-import os, logging, subprocess, queue, re, requests, threading, shutil.rmtree, signal, time, sys
+import os, logging, subprocess, queue, re, requests, threading,
+shutil.rmtree, shutil.which, signal, time, sys
+
 from zipfile import ZipFile
 
 PLAYLIST = 'playlist.m3u'
@@ -20,17 +22,20 @@ class FlacPhobic:
         self.isdir_lock = threading.Lock()
         
         if not os.path.isfile(FFMPEG_PATH):
-            r = requests.get('https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip', stream=True)
-            zip_path = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.zip')
-            with open(zip_path, 'wb') as f:
-                for chunk in r.iter_content(chunk_size=1024):
-                    if chunk:
-                        f.write(chunk)
-            with ZipFile(zip_path, 'r') as ffzip:
-                ffzip.extract('ffmpeg-latest-win64-static/bin/ffmpeg.exe', FLAC_PHOBIC_DIR)
-                os.rename(os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg-latest-win64-static/bin/ffmpeg.exe'), FFMPEG_PATH)
-            os.remove(zip_path)
-            shutil.rmtree(os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg-latest-win64-static'))
+            if shutil.which('ffmpeg') != None:
+                FFMPEG_PATH = shutil.which('ffmpeg')
+            else:
+                r = requests.get('https://ffmpeg.zeranoe.com/builds/win64/static/ffmpeg-latest-win64-static.zip', stream=True)
+                zip_path = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.zip')
+                with open(zip_path, 'wb') as f:
+                    for chunk in r.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+                with ZipFile(zip_path, 'r') as ffzip:
+                    ffzip.extract('ffmpeg-latest-win64-static/bin/ffmpeg.exe', FLAC_PHOBIC_DIR)
+                    os.rename(os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg-latest-win64-static/bin/ffmpeg.exe'), FFMPEG_PATH)
+                os.remove(zip_path)
+                shutil.rmtree(os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg-latest-win64-static'))
 
         with open(playlist, 'r') as f:
             for line in f.readlines():
@@ -39,7 +44,9 @@ class FlacPhobic:
                         self.flacs.append(line.rstrip())
                     else:
                         self.static.append(line.rstrip())
-
+        if not os.path.isdir(OUTPUT_DIRECTORY):
+            os.makedirs(OUTPUT_DIRECTORY)
+    
     def compress_worker(self):
         while True:
             try:
@@ -60,33 +67,28 @@ class FlacPhobic:
             else:
                 self.compressed.append(output)
 
-
     def compress_flacs(self):
+        os.chdir(OUTPUT_DIRECTORY)
         try:
-            with open(os.path.join(OUTPUT_DIRECTORY, 'flac_phobic.m3u'), 'r') as f:
+            with open('flac_phobic.m3u', 'r') as f:
                 self.old_playlist = f.readlines() # previous flac_phobic playlist, not the foobar playlist
         except:
             self.old_playlist = None
-        
         for path in self.flacs:
             head, filename = os.path.split(path)
             filename, _ = os.path.splitext(filename)
-            output = os.path.normpath(OUTPUT_DIRECTORY + os.path.splitdrive(head)[1] + '/' + filename + '.mp3')
+            output = os.path.normpath(os.path.splitdrive(head)[1] + '/' + filename + '.mp3')
             self.queue.put((path, output))
             self.total_queue_size = self.queue.qsize()
-
         for i in range(4):
             thread = threading.Thread(target=self.compress_worker)
             thread.start()
             self.threads.append(thread)
-
         for thread in self.threads:
             thread.join()
             
     def build_playlist(self):
-        playlist_path = os.path.normpath(os.path.join(OUTPUT_DIRECTORY, 'flac_phobic.m3u'))
-        if not os.path.isdir(OUTPUT_DIRECTORY):
-            os.makedirs(OUTPUT_DIRECTORY)
+        playlist_path = 'flac_phobic.m3u'
         with open(playlist_path, 'w') as f:
             for each in self.static:
                 f.write(each + "\n")
@@ -102,7 +104,7 @@ def handler(signum, frame):
 
 signal.signal(signal.SIGINT, handler)
 
-#def main():
-flac_phobic = FlacPhobic(PLAYLIST)
-flac_phobic.compress_flacs()
-flac_phobic.build_playlist()
+def main():
+    flac_phobic = FlacPhobic(PLAYLIST)
+    flac_phobic.compress_flacs()
+    flac_phobic.build_playlist()
