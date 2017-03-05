@@ -11,5 +11,9 @@ setup(name='flac_phobic',
         entry_points={
             "console_scripts": ['flac_phobic = flac_phobic.flac_phobic:main']
         },
+        install_requires={
+            'requests',
+            'unidecode',
+        }
 )
 

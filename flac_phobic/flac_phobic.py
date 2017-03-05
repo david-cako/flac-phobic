@@ -1,15 +1,15 @@
 #!/usr/bin/python3
 import os, logging, subprocess, queue, re, requests, threading, \
-    shutil, time, sys
+    shutil, time, sys, unidecode
 from zipfile import ZipFile
 
 PLAYLIST = 'playlist.m3u'
 ENCODE_QUALITY = "0"  # LAME VBR quality -- default V0
-OUTPUT_DIRECTORY = os.path.expanduser('Z:/Music/flac_phobic')
+OUTPUT_DIRECTORY = os.path.expanduser('Z:\\Music\\flac_phobic')
 FLAC_PHOBIC_DIR = os.path.dirname(os.path.realpath(__file__))
 FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py directory
 
-logging.basicConfig(filename='flac_phobic.log', level=logging.INFO,
+logging.basicConfig(filename="flac_phobic.log", level=logging.INFO,
                     format='%(asctime)-15s %(message)s')
 
 class FlacPhobic:
@@ -42,7 +42,7 @@ class FlacPhobic:
 
         with open(PLAYLIST, 'r') as f:
             for line in f.readlines():
-                if line.strip(): # no empty lines
+                if line.strip() and os.path.isfile(line.rstrip()): # no empty lines, no non-existent files
                     if line.endswith('.flac\n'):
                         self.flacs.append(line.rstrip())
                     else:
@@ -62,9 +62,13 @@ class FlacPhobic:
                 self.isdir_lock.acquire()
                 if not os.path.isdir(os.path.split(output)[0]):
                     os.makedirs(os.path.split(output)[0])
+                    if os.path.isfile(os.path.join(os.path.split(path)[0], 'folder.jpg')):
+                        shutil.copy2(os.path.join(os.path.split(path)[0], 'folder.jpg'), os.path.split(output)[0])
+                    if os.path.isfile(os.path.join(os.path.split(path)[0], 'folder.png')):
+                        shutil.copy2(os.path.join(os.path.split(path)[0], 'folder.png'), os.path.split(output)[0])
                 self.isdir_lock.release()
-                logging.info(os.listdir())
-                process = subprocess.run([FFMPEG_PATH, '-n', '-i', path, '-q:a', ENCODE_QUALITY, output],
+                process = subprocess.run([FFMPEG_PATH, '-n', '-i', path, '-q:a', ENCODE_QUALITY,
+                                        '-map_metadata', '0', '-id3v2_version', '3', output],
                                         stderr=subprocess.PIPE)
                 logging.info("output: %s", process.stderr)
                 self.compressed.append(output)
@@ -80,16 +84,15 @@ class FlacPhobic:
         for path in self.flacs:
             head, filename = os.path.split(path)
             filename, _ = os.path.splitext(filename)
-            output = os.path.normpath(OUTPUT_DIRECTORY + os.path.splitdrive(head)[1] + '/' + filename + '.mp3')
-            print(os.path.split(output)[0])
+            output = OUTPUT_DIRECTORY + os.path.splitdrive(head)[1] + '\\' + filename + '.mp3'
             self.queue.put((path, output))
             self.total_queue_size = self.queue.qsize()
         for i in range(4):
             thread = threading.Thread(target=self.compress_worker)
             thread.start()
             self.threads.append(thread)
-        while threading.active_count() > 0:
-            time.sleep(0.5)
+        while threading.active_count() > 1:
+            time.sleep(1)
         for thread in self.threads:
             thread.join()
             
