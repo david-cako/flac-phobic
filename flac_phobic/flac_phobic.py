@@ -1,7 +1,6 @@
 #!/usr/bin/python3
-import os, logging, subprocess, queue, re, requests, threading,
-shutil.rmtree, shutil.which, signal, time, sys
-
+import os, logging, subprocess, queue, re, requests, threading, \
+    shutil.rmtree, shutil.which, signal, time, sys
 from zipfile import ZipFile
 
 PLAYLIST = 'playlist.m3u'
