@@ -19,7 +19,8 @@ class FlacPhobic:
         self.queue = queue.Queue()
         self.threads = []
         self.isdir_lock = threading.Lock()
-        
+ 
+    def prep_workarea(self):
         if not os.path.isfile(FFMPEG_PATH):
             if shutil.which('ffmpeg') != None:
                 FFMPEG_PATH = shutil.which('ffmpeg')
@@ -105,5 +106,6 @@ signal.signal(signal.SIGINT, handler)
 
 def main():
     flac_phobic = FlacPhobic(PLAYLIST)
+    flac_phobic.prep_workarea()
     flac_phobic.compress_flacs()
     flac_phobic.build_playlist()
