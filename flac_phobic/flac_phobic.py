@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 import os, logging, subprocess, queue, re, requests, threading, \
-    shutil, time, sys, unidecode
+    shutil, time, sys, unidecode, argparse
 from zipfile import ZipFile
 
-PLAYLIST = 'playlist.m3u'
-ENCODE_QUALITY = "0"  # LAME VBR quality -- default V0
-OUTPUT_DIRECTORY = os.path.expanduser('Z:\\Music\\flac_phobic')
+parser = argparse.ArgumentParser(description='Create iTunes-compatible playlists from existing playlists, '
+                                             'converting FLAC to mp3 as needed.')
+parser.add_argument('playlist', metavar='{input playlist}', help='.m3u file with one track per line')
+parser.add_argument('outputdir', metavar='{output directory}')
+parser.add_argument('-q', '--quality', default='0')
+
 FLAC_PHOBIC_DIR = os.path.dirname(os.path.realpath(__file__))
 FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py directory
 
@@ -108,6 +111,10 @@ class FlacPhobic:
 
 def main():
     try:
+        args = parser.parse_args()
+        PLAYLIST = args.playlist
+        ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0
+        OUTPUT_DIRECTORY = args.outputdir
         flac_phobic = FlacPhobic()
         flac_phobic.prep_workarea()
         flac_phobic.compress_flacs()
