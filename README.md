@@ -10,11 +10,9 @@ flac-phobic eases the pain of this, taking an m3u as input, encoding all FLAC fi
 
 ##Usage
 ##arguments not yet implemented
-`flac_phobic playlist.m3u {-q quality} {-o output directory}`
+`flac_phobic playlist.m3u Z:/Music/flac_phobic/`
 
 `{quality}` [accepts an integer from 0-9](https://trac.ffmpeg.org/wiki/Encode/MP3), and defaults to `0` (`V0`).
-
-`{output directory}` defaults to `~/Music/flac_phobic/`.
 
 Make sure your playlists are just lists of files:
 
