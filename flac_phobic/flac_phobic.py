@@ -7,7 +7,7 @@ parser = argparse.ArgumentParser(description='Create iTunes-compatible playlists
                                              'converting FLAC to mp3 as needed.')
 parser.add_argument('playlist', metavar='{input playlist}', help='.m3u file with one track per line')
 parser.add_argument('outputdir', metavar='{output directory}')
-parser.add_argument('-q', '--quality', default='0')
+parser.add_argument('-q', '--quality', default='0', help='LAME VBR value (0, 1, 2, 3, etc.)')
 
 FLAC_PHOBIC_DIR = os.path.dirname(os.path.realpath(__file__))
 FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py directory
