@@ -110,11 +110,13 @@ class FlacPhobic:
         print("completed playlist output to " + playlist_path)
 
 def main():
+    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY
+    args = parser.parse_args()
+    PLAYLIST = os.path.abspath(args.playlist)
+    print(PLAYLIST)
+    ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0
+    OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
     try:
-        args = parser.parse_args()
-        PLAYLIST = args.playlist
-        ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0
-        OUTPUT_DIRECTORY = os.path.normpath(args.outputdir)
         flac_phobic = FlacPhobic()
         flac_phobic.prep_workarea()
         flac_phobic.compress_flacs()
