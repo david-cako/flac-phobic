@@ -113,7 +113,6 @@ def main():
     global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY
     args = parser.parse_args()
     PLAYLIST = os.path.abspath(args.playlist)
-    print(PLAYLIST)
     ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0
     OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
     try:
