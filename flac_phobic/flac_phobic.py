@@ -8,12 +8,13 @@ parser = argparse.ArgumentParser(description='Create iTunes-compatible playlists
 parser.add_argument('playlist', metavar='[input playlist]', help='.m3u file with one track per line')
 parser.add_argument('outputdir', metavar='[output directory]')
 parser.add_argument('-q', '--quality', default='0', help='LAME VBR value (0, 1, 2, 3, etc.)')
+parser.add_argument('--log', action='store_true', help='output log file in current directory.')
+
+DEFAULT_PLAYLIST="Z:\\Documents\\playlist.m3u"
+DEFAULT_OUTPUT="Z:\\Music\\flac_phobic"
 
 FLAC_PHOBIC_DIR = os.path.dirname(os.path.realpath(__file__))
 FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py directory
-
-logging.basicConfig(filename="flac_phobic.log", level=logging.INFO,
-                    format='%(asctime)-15s %(message)s')
 
 class FlacPhobic:
     def __init__(self): 
@@ -73,7 +74,8 @@ class FlacPhobic:
                 process = subprocess.run([FFMPEG_PATH, '-n', '-i', path, '-q:a', ENCODE_QUALITY,
                                         '-map_metadata', '0', '-id3v2_version', '3', output],
                                         stderr=subprocess.PIPE)
-                logging.info("output: %s", process.stderr)
+                if LOGGING_ENABLED == True:
+                    logging.info("output: %s", process.stderr)
                 self.compressed.append(output)
             else:
                 self.compressed.append(output)
@@ -101,7 +103,7 @@ class FlacPhobic:
             
     def build_playlist(self):
         playlist_path = os.path.normpath(os.path.join(OUTPUT_DIRECTORY, 'flac_phobic.m3u'))
-        with open(playlist_path, 'w') as f:
+        with open(playlist_path, 'w', encoding='utf8') as f:
             for each in self.static:
                 f.write(each + "\n")
             for each in self.compressed:
@@ -110,11 +112,23 @@ class FlacPhobic:
         print("completed playlist output to " + playlist_path)
 
 def main():
-    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY
+    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY, LOGGING_ENABLED
     args = parser.parse_args()
-    PLAYLIST = os.path.abspath(args.playlist)
-    ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0
-    OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
+    if args.playlist == 'default':
+        PLAYLIST = DEFAULT_PLAYLIST
+    else:
+        PLAYLIST = os.path.abspath(args.playlist)
+    if args.outputdir == 'default':
+        OUTPUT_DIRECTORY = DEFAULT_OUTPUT
+    else:
+        OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
+    ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0    
+    if args.log == True:
+        LOGGING_ENABLED = True
+        logging.basicConfig(filename="flac_phobic.log", level=logging.INFO,
+                    format='%(asctime)-15s %(message)s')
+    else:
+        LOGGING_ENABLED = False
     try:
         flac_phobic = FlacPhobic()
         flac_phobic.prep_workarea()
