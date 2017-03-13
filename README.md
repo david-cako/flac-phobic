@@ -20,3 +20,7 @@ Make sure your playlists are just lists of files:
     Z:\Music\...\...\...\(...).mp3
 
 This script takes *every* line from the playlist, so any extraneous crap is going to be a problem.
+
+##todo
+
+- Tracks that are no longer in source playlist should be removed.
