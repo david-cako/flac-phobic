@@ -8,7 +8,7 @@ Seeing as iTunes is incompatible with FLAC, and not wanting to convert a decent 
 
 flac-phobic eases the pain of this, taking an m3u as input, encoding all FLAC files as mp3, and constructing a new playlist containing all of the newly encoded mp3s, as well as all of the existing lossy files.  Encoded files are output into a new directory, with all of the original directory structure being maintained beneath it.
 
-##Usage
+## Usage
 `flac_phobic [-q QUALITY] playlist.m3u Z:/Music/flac_phobic/`
 
 `{quality}` [accepts an integer from 0-9](https://trac.ffmpeg.org/wiki/Encode/MP3), and defaults to `0` (`V0`).
@@ -21,6 +21,6 @@ Make sure your playlists are just lists of files:
 
 This script takes *every* line from the playlist, so any extraneous crap is going to be a problem.
 
-##todo
+## todo
 
 - Tracks that are no longer in source playlist should be removed.
