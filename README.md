@@ -2,7 +2,7 @@
 
 Create iTunes-compatible playlists from existing playlists, converting flac to mp3 as needed
 
-I listen to a lot of music, and it's pretty frustrating trying to maintain both a foobar2000 playlist and an iTunes playlist on my Windows machine for my iPhone sync.
+I listen to a lot of music, and it's pretty frustrating trying to maintain both a foobar2000 playlist on my Windows machine and an iTunes playlist for my iPhone sync.
 
 Seeing as iTunes is incompatible with FLAC, and not wanting to convert a decent portion of my music library from a widely supported format to a less widely supported format, I've just dealt with it, manually converting and maintaining them separately.
 
@@ -21,6 +21,4 @@ Make sure your playlists are just lists of files:
 
 This script takes *every* line from the playlist, so any extraneous crap is going to be a problem.
 
-## todo
-
-- Tracks that are no longer in source playlist should be removed.
+foobar2000 refuses to output non-latin characters (I've really only had issues with Japanese and Chinese) correctly in its exported playlists, but flac-phobic *does* work with non-latin paths.  I've worked around this by just having a secondary iTunes playlist of files with non-latin paths that I manage manually.
