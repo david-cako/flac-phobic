@@ -3,18 +3,20 @@ import os, logging, subprocess, queue, re, requests, threading, \
     shutil, time, sys, unidecode, argparse
 from zipfile import ZipFile
 
-parser = argparse.ArgumentParser(description='Create iTunes-compatible playlists from existing playlists, '
-                                             'converting FLAC to mp3 as needed.')
-parser.add_argument('playlist', metavar='[input playlist]', help='.m3u file with one track per line')
-parser.add_argument('outputdir', metavar='[output directory]')
-parser.add_argument('-q', '--quality', default='0', help='LAME VBR value (0, 1, 2, 3, etc.)')
-parser.add_argument('--log', action='store_true', help='output log file in current directory.')
-
 DEFAULT_PLAYLIST="Z:\\Documents\\playlist.m3u"
 DEFAULT_OUTPUT="Z:\\Music\\flac_phobic"
+DEFAULT_RSYNC_STRIP="Z:\\Music\\"
 
 FLAC_PHOBIC_DIR = os.path.dirname(os.path.realpath(__file__))
 FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py directory
+
+parser = argparse.ArgumentParser(description='Create iTunes-compatible playlists from existing playlists, '
+                                             'converting FLAC to mp3 as needed.')
+parser.add_argument('playlist', default=DEFAULT_PLAYLIST, metavar='[input playlist]', help='.m3u file with one track per line')
+parser.add_argument('outputdir', default=DEFAULT_OUTPUT, metavar='[output directory]')
+parser.add_argument('-q', '--quality', default='0', help='LAME VBR value (0, 1, 2, 3, etc.)')
+parser.add_argument('--log', action='store_true', help='output log file in current directory.')
+parser.add_argument('--rsync-strip', default=DEFAULT_RSYNC_STRIP help='String to strip from beginning of rsync file-list.')
 
 class FlacPhobic:
     def __init__(self): 
@@ -62,7 +64,7 @@ class FlacPhobic:
                 break
             print("encoding file {} of {} - {} -> {}{}".format(self.total_queue_size - self.queue.qsize(), 
                                                 self.total_queue_size, path, output, " "*20), end='\r', flush=True)
-            if self.old_playlist == None or output not in self.old_playlist:
+            if not os.path.exists(output):
                 self.isdir_lock.acquire()
                 if not os.path.isdir(os.path.split(output)[0]):
                     os.makedirs(os.path.split(output)[0])
@@ -81,11 +83,6 @@ class FlacPhobic:
                 self.compressed.append(output)
 
     def compress_flacs(self):
-        try:
-            with open(os.path.join(OUTPUT_DIRECTORY, 'flac_phobic.m3u'), 'r') as f:
-                self.old_playlist = f.readlines() # previous flac_phobic playlist, not the foobar playlist
-        except:
-            self.old_playlist = None
         for path in self.flacs:
             head, filename = os.path.split(path)
             filename, _ = os.path.splitext(filename)
@@ -111,18 +108,23 @@ class FlacPhobic:
         print("")
         print("completed playlist output to " + playlist_path)
 
+    def build_rsync_manifest(self):
+        manifest_path = os.path.normpath(os.path.join(OUTPUT_DIRECTORY, 'rsync_manifest.txt'))
+        with open(manifest_path, 'w', encoding='utf8') as f:
+            for each in self.static:
+                new_path = each.replace(RSYNC_STRIP, "").replace("\\", "/")
+                f.write(new_path + "\n")
+            for each in self.compressed:
+                new_path = each.replace(RSYNC_STRIP, "").replace("\\", "/")
+                f.write(new_path + "\n")
+
 def main():
-    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY, LOGGING_ENABLED
+    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY, LOGGING_ENABLED, RSYNC_PREFIX
     args = parser.parse_args()
-    if args.playlist == 'default':
-        PLAYLIST = DEFAULT_PLAYLIST
-    else:
-        PLAYLIST = os.path.abspath(args.playlist)
-    if args.outputdir == 'default':
-        OUTPUT_DIRECTORY = DEFAULT_OUTPUT
-    else:
-        OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
+    PLAYLIST = os.path.abspath(args.playlist)
+    OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
     ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0    
+    RSYNC_STRIP = args.rsync_strip
     if args.log == True:
         LOGGING_ENABLED = True
         logging.basicConfig(filename="flac_phobic.log", level=logging.INFO,
@@ -134,6 +136,7 @@ def main():
         flac_phobic.prep_workarea()
         flac_phobic.compress_flacs()
         flac_phobic.build_playlist()
+        flac_phobic.build_rsync_manifest()
     except KeyboardInterrupt:
         flac_phobic.thread_kill_event.set()
         print("")
