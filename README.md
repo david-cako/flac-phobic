@@ -11,7 +11,7 @@ flac-phobic eases the pain of this, taking an m3u as input, encoding all FLAC fi
 ## Usage
 `flac_phobic [-i INPUT PLAYLIST] [-o OUTPUT DIRECTORY] [-q QUALITY]`
 
-`{quality}` [accepts an integer from 0-9](https://trac.ffmpeg.org/wiki/Encode/MP3), and defaults to `0` (`V0`).
+`{quality}` accepts an integer from 0-9 representing the [VBR setting](https://trac.ffmpeg.org/wiki/Encode/MP3), and defaults to `0` (`V0`).
 
 Make sure your playlists are just lists of files:
 
