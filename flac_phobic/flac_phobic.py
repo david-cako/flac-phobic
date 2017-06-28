@@ -12,11 +12,11 @@ FFMPEG_PATH = os.path.join(FLAC_PHOBIC_DIR, 'ffmpeg.exe') # flac_phobic.py direc
 
 parser = argparse.ArgumentParser(description='Create iTunes-compatible playlists from existing playlists, '
                                              'converting FLAC to mp3 as needed.')
-parser.add_argument('playlist', default=DEFAULT_PLAYLIST, metavar='[input playlist]', help='.m3u file with one track per line')
-parser.add_argument('outputdir', default=DEFAULT_OUTPUT, metavar='[output directory]')
+parser.add_argument('-i', '--input', default=DEFAULT_PLAYLIST, metavar='[input playlist]', help='.m3u file with one track per line')
+parser.add_argument('-o', '--output', default=DEFAULT_OUTPUT, metavar='[output directory]')
 parser.add_argument('-q', '--quality', default='0', help='LAME VBR value (0, 1, 2, 3, etc.)')
 parser.add_argument('--log', action='store_true', help='output log file in current directory.')
-parser.add_argument('--rsync-strip', default=DEFAULT_RSYNC_STRIP help='String to strip from beginning of rsync file-list.')
+parser.add_argument('--rsync-strip', default=DEFAULT_RSYNC_STRIP, help='String to strip from beginning of rsync file-list.')
 
 class FlacPhobic:
     def __init__(self): 
@@ -119,10 +119,10 @@ class FlacPhobic:
                 f.write(new_path + "\n")
 
 def main():
-    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY, LOGGING_ENABLED, RSYNC_PREFIX
+    global PLAYLIST, ENCODE_QUALITY, OUTPUT_DIRECTORY, LOGGING_ENABLED, RSYNC_STRIP
     args = parser.parse_args()
-    PLAYLIST = os.path.abspath(args.playlist)
-    OUTPUT_DIRECTORY = os.path.abspath(args.outputdir)
+    PLAYLIST = os.path.abspath(args.input)
+    OUTPUT_DIRECTORY = os.path.abspath(args.output)
     ENCODE_QUALITY = args.quality  # LAME VBR quality -- default V0    
     RSYNC_STRIP = args.rsync_strip
     if args.log == True:
