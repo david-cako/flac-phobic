@@ -22,3 +22,8 @@ Make sure your playlists are just lists of files:
 This script takes *every* line from the playlist, so any extraneous crap is going to be a problem.
 
 foobar2000 refuses to output non-latin characters (I've really only had issues with Japanese and Chinese) correctly in its exported playlists, but flac-phobic *does* work with non-latin paths.  I've worked around this by just having a secondary iTunes playlist of files with non-latin paths that I manage manually.
+
+## rsync
+flac_phobic also outputs a manifest that can be used to sync the outputted playlist to another computer.
+
+`rsync -avP --files-from=flac_phobic/rsync_manifest.txt [SOURCE] [DESTINATION]`
